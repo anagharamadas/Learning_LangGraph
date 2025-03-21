@@ -1,4 +1,3 @@
-import getpass
 import os
 from typing import Annotated
 from typing_extensions import TypedDict
@@ -8,25 +7,28 @@ from langchain_anthropic import ChatAnthropic
 from IPython.display import Image, display
 import warnings
 from langchain_community.chat_models import ChatPerplexity
+#from langchain_tavily import TavilySearch
+from langchain_community.tools.tavily_search import TavilySearchResults
+from dotenv import load_dotenv
+
 
 warnings.filterwarnings("ignore")
 
-
 """
-def _set_env(var:str):
-    if not os.environ.get(var):
-        os.environ[var] = getpass.getpass(f"{var}: ")
+# Load environment variables from .env file
+load_dotenv()
 
-_set_env("ANTHROPIC_API_KEY")"
-"""
+os.environ["PPLX_API_KEY"] = os.getenv("PPLX_API_KEY")
 
-os.environ["PPLX_API_KEY"] = getpass.getpass("PPLX_API_KEY: ")
+
 
 chat = ChatPerplexity(
         temperature=0, 
         pplx_api_key=os.environ["PPLX_API_KEY"],
         model="sonar-pro"
         )
+
+
 
 class State(TypedDict):
     messages: Annotated[list, add_messages]
@@ -74,4 +76,40 @@ while True:
         user_input = "What do you know about LangGraph?"
         print("User:" + user_input)
         stream_graph_updates(user_input)
-        break        
+        break  
+
+"""   
+
+
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Set API key as an environment variable
+os.environ["TAVILY_API_KEY"] = os.getenv("TAVIL_API_KEY")
+
+
+
+
+
+tool = TavilySearchResults(
+        max_results=5,
+        topic="general",
+        tavily_api_key=os.environ["TAVILY_API_KEY"]
+)
+
+
+model_generated_tool_call = {
+    "args": {"query": "What happened at the last wimbledon"},
+    "id": "1",
+    "name": "tavily",
+    "type": "tool_call",
+}
+
+tool_msg = tool.invoke(model_generated_tool_call)
+
+print(tool_msg.content[:400])
+
+
+
+
